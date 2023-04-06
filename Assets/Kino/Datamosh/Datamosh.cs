@@ -80,10 +80,29 @@ namespace Kino
         [Tooltip("Amount of random displacement.")]
         float _diffusion = 0.4f;
 
+    public GameObject _player;
+    bool shouldRenderEffect = false;
+    RenderTexture previousEffect;
+    RenderTexture currentFrame;
+    RenderTexture maskTexture;
+
+void Start() {
+    _player = GameObject.Find("Player");
+    previousEffect = new RenderTexture(Screen.width, Screen.height, 0);
+    currentFrame = new RenderTexture(Screen.width, Screen.height, 0);
+    maskTexture = new RenderTexture(Screen.width, Screen.height, 0);
+}
+
+// void UpdateMaskTexture() {
+//     // Create a texture that is black outside of the circle and white inside
+//     Graphics.Blit(null, maskTexture, _maskShader);
+//     _material.SetTexture("_MaskTex", maskTexture);
+// }
+
         /// Start glitching.
         public void Glitch()
         {
-            _sequence = 1;
+            _sequence = 1; 
         }
 
         /// Stop glitching.
@@ -155,69 +174,76 @@ namespace Kino
             _material = null;
         }
 
-        void OnRenderImage(RenderTexture source, RenderTexture destination)
-        {
-            _material.SetFloat("_BlockSize", _blockSize);
-            _material.SetFloat("_Quality", 1 - _entropy);
-            _material.SetFloat("_Contrast", _noiseContrast);
-            _material.SetFloat("_Velocity", _velocityScale);
-            _material.SetFloat("_Diffusion", _diffusion);
 
-            if (_sequence == 0)
+
+
+       void OnRenderImage(RenderTexture source, RenderTexture destination)
+{
+    _material.SetFloat("_BlockSize", _blockSize);
+    _material.SetFloat("_Quality", 1 - _entropy);
+    _material.SetFloat("_Contrast", _noiseContrast);
+    _material.SetFloat("_Velocity", _velocityScale);
+    _material.SetFloat("_Diffusion", _diffusion);
+
+    if (_sequence == 0)
+    {
+        // Step 0: no effect, just keep the last frame.
+
+        // Update the working buffer with the current frame.
+        ReleaseBuffer(_workBuffer);
+        _workBuffer = NewWorkBuffer(source);
+        Graphics.Blit(source, _workBuffer);
+
+        // Blit without effect.
+        Graphics.Blit(source, destination);
+    }
+    else if (_sequence == 1)
+    {
+        // Step 1: start effect, no moshing.
+
+        // Initialize the displacement buffer.
+        ReleaseBuffer(_dispBuffer);
+        _dispBuffer = NewDispBuffer(source);
+        Graphics.Blit(null, _dispBuffer, _material, 0);
+
+        // Simply blit the working buffer because motion vectors
+        // might not be ready (because of camera switching).
+        Graphics.Blit(_workBuffer, destination);
+
+        _sequence++;
+    }
+    else
+    {
+        // Step 2: apply effect.
+
+            if (Time.frameCount != _lastFrame)
             {
-                // Step 0: no effect, just keep the last frame.
-
-                // Update the working buffer with the current frame.
-                ReleaseBuffer(_workBuffer);
-                _workBuffer = NewWorkBuffer(source);
-                Graphics.Blit(source, _workBuffer);
-
-                // Blit without effect.
-                Graphics.Blit(source, destination);
-            }
-            else if (_sequence == 1)
-            {
-                // Step 1: start effect, no moshing.
-
-                // Initialize the displacement buffer.
+                // Update the displaceent buffer.
+                var newDisp = NewDispBuffer(source);
+                Graphics.Blit(_dispBuffer, newDisp, _material, 1);
                 ReleaseBuffer(_dispBuffer);
-                _dispBuffer = NewDispBuffer(source);
-                Graphics.Blit(null, _dispBuffer, _material, 0);
+                _dispBuffer = newDisp;
 
-                // Simply blit the working buffer because motion vectors
-                // might not be ready (because of camera switching).
-                Graphics.Blit(_workBuffer, destination);
+                // Moshing!
+                var newWork = NewWorkBuffer(source);
+                _material.SetTexture("_WorkTex", _workBuffer);
+                _material.SetTexture("_DispTex", _dispBuffer);
+                Graphics.Blit(source, newWork, _material, 2);
+                ReleaseBuffer(_workBuffer);
+                _workBuffer = newWork;
 
-                _sequence++;
+                _lastFrame = Time.frameCount;
             }
-            else
-            {
-                // Step 2: apply effect.
 
-                if (Time.frameCount != _lastFrame)
-                {
-                    // Update the displaceent buffer.
-                    var newDisp = NewDispBuffer(source);
-                    Graphics.Blit(_dispBuffer, newDisp, _material, 1);
-                    ReleaseBuffer(_dispBuffer);
-                    _dispBuffer = newDisp;
-
-                    // Moshing!
-                    var newWork = NewWorkBuffer(source);
-                    _material.SetTexture("_WorkTex", _workBuffer);
-                    _material.SetTexture("_DispTex", _dispBuffer);
-                    Graphics.Blit(source, newWork, _material, 2);
-                    ReleaseBuffer(_workBuffer);
-                    _workBuffer = newWork;
-
-                    _lastFrame = Time.frameCount;
-                }
-
-                // Blit the result.
-                Graphics.Blit(_workBuffer, destination);
-            }
-        }
+            // Blit the result.
+            Graphics.Blit(_workBuffer, destination);
+}
 
         #endregion
     }
 }
+
+}
+
+
+
