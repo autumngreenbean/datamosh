@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,12 +15,12 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private float dashingPower = 24f;
     private float dashingTime = 0.01f;
-    private float dashingCooldown = 1f;
+    private float dashingCooldown = 5f;
     private float dashTimer = 0f;
 
     private bool isAscending;
     private float ascendingPower = 32f;
-    private float ascendingCooldown = 2f;
+    private float ascendingCooldown = 10f;
     private float ascendTimer = 0f;
 
     [SerializeField] private Rigidbody rb;
@@ -33,8 +35,8 @@ public class PlayerController : MonoBehaviour
     {
         playerRigidbody = GetComponent<Rigidbody>();
         playerRigidbody.freezeRotation = true;
-        dashCooldownText = GameObject.Find("Canvas/DashCooldownText").GetComponent<Text>();
-        ascendCooldownText = GameObject.Find("Canvas/AscendCooldownText").GetComponent<Text>();
+        dashCooldownText = GameObject.Find("Canvas/dashCooldownText").GetComponent<TMP_Text>();
+    ascendCooldownText = GameObject.Find("Canvas/ascendCooldownText").GetComponent<TMP_Text>();
     }
 
     private void Update()
@@ -73,27 +75,32 @@ private void UpdateCooldowns()
 }
 
     private void FixedUpdate()
+{
+    if (isDashing)
     {
-        if (isDashing)
-        {
-            return;
-        }
-
-        if (isAscending)
-        {
-            rb.AddForce(Vector3.up * ascendingPower * rb.mass, ForceMode.Force);
-        }
-
-        // Apply horizontal movement
-        Vector3 movement = new Vector3(horizontal * speed * Time.fixedDeltaTime, 0f, 0f);
-        rb.MovePosition(transform.position + movement);
-
-        // Apply gravity
-        rb.AddForce(Physics.gravity * rb.mass, ForceMode.Force);
-
-        dashTimer -= Time.fixedDeltaTime;
-        ascendTimer -= Time.fixedDeltaTime;
+        return;
     }
+
+    if (isAscending)
+    {
+        // calculate the force required to ascend based on current velocity and ascending power
+        Vector3 velocity = rb.velocity;
+        velocity.y = 0f; // set vertical component of velocity to zero to only apply ascending force upwards
+        Vector3 force = Vector3.up * (ascendingPower - velocity.magnitude * rb.mass);
+        rb.AddForce(force, ForceMode.Force);
+    }
+
+    // Apply horizontal movement
+    Vector3 movement = new Vector3(horizontal * speed * Time.fixedDeltaTime, 0f, 0f);
+    rb.MovePosition(transform.position + movement);
+
+    // Apply gravity
+    rb.AddForce(Physics.gravity * rb.mass, ForceMode.Force);
+
+    dashTimer -= Time.fixedDeltaTime;
+    ascendTimer -= Time.fixedDeltaTime;
+}
+
 
     private void OnCollisionEnter(Collision collision)
     {
