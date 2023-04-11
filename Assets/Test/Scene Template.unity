@@ -384,6 +384,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa52dcb583e1dd743bffce21bdda7fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  jumpingPower: 20
+  dashingPower: 20
+  dashingTime: 0.000004
+  dashingCooldown: 2
+  ascendingPower: 300
+  ascendingCooldown: 10
   rb: {fileID: 562094858}
   groundCheck: {fileID: 215436398}
   groundLayer:
@@ -392,6 +398,7 @@ MonoBehaviour:
   particleTrail: {fileID: 562094864}
   dashCooldownText: {fileID: 2088889552}
   ascendCooldownText: {fileID: 1471165520}
+  fallSpeed: 1
 --- !u!23 &562094860
 MeshRenderer:
   m_ObjectHideFlags: 0

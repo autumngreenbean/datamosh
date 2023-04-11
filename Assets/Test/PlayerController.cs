@@ -6,29 +6,37 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
-    private float horizontal;
+   private float horizontal;
     private float speed = 8f;
-    private float jumpingPower = 16f;
+    [SerializeField] private float jumpingPower = 16f;
     private bool isFacingRight = true;
 
     private bool canDash = true;
     private bool isDashing;
-    private float dashingPower = 24f;
-    private float dashingTime = 0.01f;
-    private float dashingCooldown = 5f;
+    [SerializeField] private float dashingPower = 24f;
+    [SerializeField] private float dashingTime = 0.01f;
+    [SerializeField] private float dashingCooldown = 2f;
     private float dashTimer = 0f;
 
     private bool isAscending;
-    private float ascendingPower = 32f;
-    private float ascendingCooldown = 10f;
+    [SerializeField] private float ascendingPower = 340f;
+    [SerializeField] private float ascendingCooldown = 10f;
     private float ascendTimer = 0f;
 
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private ParticleSystem particleTrail;
+
+    [Header("UI")]
     [SerializeField] private TMP_Text dashCooldownText;
     [SerializeField] private TMP_Text ascendCooldownText;
+
+    [SerializeField] private float fallSpeed = 10f;
+
+    private bool isHovering = false;
+
+
     private Rigidbody playerRigidbody;
 
     private void Start()
@@ -41,6 +49,12 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            isHovering = !isHovering;
+        }
+
         if (isDashing)
         {
             return;
@@ -76,6 +90,12 @@ private void UpdateCooldowns()
 
     private void FixedUpdate()
 {
+    if (!isHovering)
+    {
+        rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
+    }
+
+    
     if (isDashing)
     {
         return;
@@ -95,7 +115,8 @@ private void UpdateCooldowns()
     rb.MovePosition(transform.position + movement);
 
     // Apply gravity
-    rb.AddForce(Physics.gravity * rb.mass, ForceMode.Force);
+rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
+
 
     dashTimer -= Time.fixedDeltaTime;
     ascendTimer -= Time.fixedDeltaTime;
@@ -150,4 +171,9 @@ private void UpdateCooldowns()
         isAscending = false;
         ascendTimer = 0f;
     }
+    private void ToggleHover()
+{
+    isHovering = !isHovering;
 }
+}
+
