@@ -16,15 +16,13 @@ public class PlayerController : MonoBehaviour
     private bool isMoving = false;
     private float moveTime = 0f;
     private float timeMoving = 0f;
-   
-
 
     [SerializeField] private float jumpingPower = 16f;
     private bool isFacingRight = true;
 
     private bool 
     canDash = true;
-    private bool isDashing;
+    private bool isDashing = false;
     [SerializeField] private float dashingPower = 24f;
     [SerializeField] private float dashingTime = 0.01f;
     [SerializeField] private float dashingCooldown = 2f;
@@ -139,10 +137,10 @@ public class PlayerController : MonoBehaviour
 
 private void UpdateCooldowns()
 {
-    dashCooldownText.SetText("Dash Cooldown: " + Mathf.Max(0f, dashTimer).ToString("0.00"));
-    ascendCooldownText.SetText("Ascend Cooldown: " + Mathf.Max(0f, ascendTimer).ToString("0.00"));
-
+    dashCooldownText.SetText("Dash Cooldown: " + Mathf.Clamp(dashTimer, 0f, Mathf.Infinity).ToString("0.00"));
+    ascendCooldownText.SetText("Ascend Cooldown: " + Mathf.Clamp(ascendTimer, 0f, Mathf.Infinity).ToString("0.00"));
 }
+
 
     private void FixedUpdate()
 {
@@ -185,7 +183,22 @@ private void UpdateCooldowns()
         {
             canDash = true;
         }
+
     }
+
+  private void OnTriggerEnter(Collider other)
+{
+    if (other.CompareTag("NPC") && isDashing)
+    {
+        StopCoroutine("Dash");
+        canDash = true;
+        particleTrail.Stop();
+        dashTimer = 0f;
+    }
+}
+
+
+
 
     private void Flip()
     {
@@ -245,7 +258,7 @@ private void UpdateCooldowns()
     Vector3 startPosition = transform.position;
     Vector3 endPosition = transform.position + blinkDirection * blinkDistance;
     float elapsedTime = 0f;
-    Debug.Log("Blink triggered!");
+    
     while (elapsedTime < dashingTime)
     {
         rb.MovePosition(Vector3.Lerp(startPosition, endPosition, elapsedTime / dashingTime));
