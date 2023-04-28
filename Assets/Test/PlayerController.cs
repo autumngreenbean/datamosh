@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
     canDash = true;
     private bool isDashing = false;
     [SerializeField] private float dashingPower = 24f;
-    [SerializeField] private float dashingTime = 0.01f;
+    [SerializeField] private float dashingTime = 0.1f;
     [SerializeField] private float dashingCooldown = 2f;
     private float dashTimer = 0f;
 
@@ -62,15 +62,11 @@ public class PlayerController : MonoBehaviour
 
  private void Update()
 {
-    if (Input.GetKeyDown(KeyCode.H))
-    {
-        isHovering = !isHovering;
-    }
 
-    if (isDashing)
-    {
-        return;
-    }
+    // if (isDashing)
+    // {
+    //     return;
+    // }
 
     horizontal = Input.GetAxisRaw("Horizontal");
 
@@ -92,10 +88,10 @@ public class PlayerController : MonoBehaviour
     }
 
     // Added code for blink ability
-    if (Input.GetMouseButton(0) && (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-    {
-        StartCoroutine(Blink());
-    }
+    // if (Input.GetMouseButton(0) && (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+    // {
+    //     StartCoroutine(Blink());
+    // }
 
     if (horizontal != 0)
     {
@@ -171,27 +167,29 @@ private void UpdateCooldowns()
     // Apply gravity
     rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
 
-
-    dashTimer -= Time.fixedDeltaTime;
+    dashTimer = Mathf.Max(0.0f,dashTimer-Time.fixedDeltaTime);
+    // dashTimer -= Time.fixedDeltaTime;
     ascendTimer -= Time.fixedDeltaTime;
 }
 
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            canDash = true;
-        }
+    // private void OnCollisionEnter(Collision collision)
+    // {
+    //     if (collision.gameObject.CompareTag("Ground"))
+    //     {
+    //         canDash = true;
+    //     }
 
-    }
+    // }
 
   private void OnTriggerEnter(Collider other)
 {
+    Debug.Log("ok");
     if (other.CompareTag("NPC") && isDashing)
     {
+        Debug.Log("Hello!");
         StopCoroutine("Dash");
-        canDash = true;
+        dashTimer = 0;
         particleTrail.Stop();
         dashTimer = 0f;
     }
@@ -215,19 +213,15 @@ private void UpdateCooldowns()
     {
         canDash = false;
         isDashing = true;
-        rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f);
-        particleTrail.Play();
+        rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f); //consider adding force instead
 
         yield return new WaitForSeconds(dashingTime);
 
-        particleTrail.Stop();
         isDashing = false;
 
         yield return new WaitForSeconds(dashingCooldown);
 
         canDash = true;
-        particleTrail.Play();
-
         dashTimer = 0f;
     }
 
@@ -243,13 +237,16 @@ private void UpdateCooldowns()
 
     private IEnumerator Blink()
 {
+
+
+Debug.Log("blink");
     // Don't blink if already dashing or ascending
     if (isDashing || isAscending)
     {
         yield break;
     }
 
-    isDashing = true;
+    // isDashing = true;
 
     // Calculate blink direction
     Vector3 blinkDirection = Vector3.right * (Input.GetKey(KeyCode.D) ? 1f : -1f);
