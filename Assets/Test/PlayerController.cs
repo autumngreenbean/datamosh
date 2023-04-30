@@ -46,6 +46,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float blinkDistance = 10f;
     [SerializeField] private float fallSpeed = 50f;
 
+    [SerializeField] private float momentumBoostForce = 10f;
+
+    [SerializeField] private float itemSpeed = 10f;
+
+
     private bool isHovering = false;
 
     private Rigidbody playerRigidbody;
@@ -181,19 +186,53 @@ private void UpdateCooldowns()
     //     }
 
     // }
-
-  private void OnTriggerEnter(Collider other)
-{
-    Debug.Log("ok");
-    if (other.CompareTag("NPC") && isDashing)
+   private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Hello!");
-        StopCoroutine("Dash");
-        dashTimer = 0;
-        particleTrail.Stop();
-        dashTimer = 0f;
+        if (isDashing)
+        {
+            if (other.CompareTag("NPC"))
+            {
+                StopCoroutine("Dash");
+                dashTimer = 0;
+                particleTrail.Stop();
+                dashTimer = 0f;
+
+                // Add momentum boost to the player
+                Vector3 boostDir = (other.transform.position - transform.position).normalized;
+                playerRigidbody.velocity = boostDir * momentumBoostForce;
+                Invoke("ResetVelocity", 0.1f);
+            }
+           
+        }
+          if (other.CompareTag("Item"))
+            {
+                  Debug.Log("item touch");
+                // Get a reference to the item's rigidbody
+                Rigidbody itemRigidbody = other.GetComponent<Rigidbody>();
+
+                // Disable the item's collider and rigidbody so it can be picked up
+                other.GetComponent<Collider>().enabled = false;
+                itemRigidbody.isKinematic = true;
+
+                // Move the item towards the player's position
+                Vector3 moveDirection = (transform.position - other.transform.position).normalized;
+                itemRigidbody.velocity = moveDirection * itemSpeed;
+
+                // Parent the item to the player's transform
+                other.transform.parent = transform;
+
+                // Destroy the item after a short delay
+                Destroy(other.gameObject, .1f);
+                Debug.Log("item pickup");
+
+              
+            }
     }
-}
+
+    private void ResetVelocity()
+    {
+        playerRigidbody.velocity = Vector3.zero;
+    }
 
 
 
