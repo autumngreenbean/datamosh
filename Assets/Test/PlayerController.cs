@@ -224,7 +224,7 @@ private void UpdateCooldowns()
                 // Destroy the item after a short delay
                 Destroy(other.gameObject, .1f);
                 Debug.Log("item pickup");
-
+//test
               
             }
     }
