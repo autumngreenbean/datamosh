@@ -4,56 +4,53 @@ using UnityEngine.UI;
 using TMPro;
 
 
+
+
 public class PlayerController : MonoBehaviour
 {
     private float horizontal;
-    [SerializeField] private float baseSpeed = 8f;
-    [SerializeField] private float speed = 8f;       
-    [SerializeField] [Tooltip("The maximum momentum value.")] private float maxMomentum = 10f;
-    [SerializeField] [Tooltip("The time it takes to build up momentum.")]private float momentumTime = 2f;
-    [SerializeField] [Tooltip("The amount to increment the speed by per second while moving to build momentum.")]private float momentumSpeedIncrement = 1f;
-    private float momentum = 0f;
-    private bool isMoving = false;
-    private float moveTime = 0f;
-    private float timeMoving = 0f;
-
+    private float speed = 8f;
     [SerializeField] private float jumpingPower = 16f;
     private bool isFacingRight = true;
 
-    private bool 
-    canDash = true;
-    private bool isDashing = false;
+
+    private bool canDash = true;
+    private bool isDashing;
     [SerializeField] private float dashingPower = 24f;
-    [SerializeField] private float dashingTime = 0.1f;
+    [SerializeField] private float dashingTime = 0.01f;
     [SerializeField] private float dashingCooldown = 2f;
     private float dashTimer = 0f;
+
 
     private bool isAscending;
     [SerializeField] private float ascendingPower = 340f;
     [SerializeField] private float ascendingCooldown = 10f;
     private float ascendTimer = 0f;
 
+
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private ParticleSystem particleTrail;
 
+
     [Header("UI")]
-    [SerializeField] private TMP_Text momentumText;
     [SerializeField] private TMP_Text dashCooldownText;
     [SerializeField] private TMP_Text ascendCooldownText;
 
-    [SerializeField] private float blinkDistance = 10f;
-    [SerializeField] private float fallSpeed = 50f;
 
-    [SerializeField] private float momentumBoostForce = 10f;
+    [SerializeField] private float fallSpeed = 10f;
 
-    [SerializeField] private float itemSpeed = 10f;
+
 
 
     private bool isHovering = false;
 
+
+
+
     private Rigidbody playerRigidbody;
+
 
     private void Start()
     {
@@ -61,85 +58,55 @@ public class PlayerController : MonoBehaviour
         playerRigidbody.freezeRotation = true;
         dashCooldownText = GameObject.Find("Canvas/dashCooldownText").GetComponent<TMP_Text>();
         ascendCooldownText = GameObject.Find("Canvas/ascendCooldownText").GetComponent<TMP_Text>();
-        momentumText = GameObject.Find("Canvas/momentumText").GetComponent<TMP_Text>();
-
     }
 
- private void Update()
-{
 
-    // if (isDashing)
-    // {
-    //     return;
-    // }
-
-    horizontal = Input.GetAxisRaw("Horizontal");
-
-    if (Input.GetButtonDown("Jump"))
+    private void Update()
     {
-        rb.velocity = new Vector3(rb.velocity.x, jumpingPower, rb.velocity.z);
-    }
 
-    if (Input.GetKey(KeyCode.LeftShift) && canDash && dashTimer <= 0)
-    {
-        StartCoroutine(Dash());
-        dashTimer = dashingCooldown;
-    }
 
-    if (Input.GetKeyDown(KeyCode.LeftControl) && ascendTimer <= 0)
-    {
-        StartCoroutine(Ascend());
-        ascendTimer = ascendingCooldown;
-    }
-
-    // Added code for blink ability
-    // if (Input.GetMouseButton(0) && (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-    // {
-    //     StartCoroutine(Blink());
-    // }
-
-    if (horizontal != 0)
-    {
-        if (!isMoving)
+        if (Input.GetKeyDown(KeyCode.H))
         {
-            isMoving = true;
-            timeMoving = 0f;
+            isHovering = !isHovering;
         }
-        else
+
+
+        if (isDashing)
         {
-            timeMoving += Time.deltaTime;
-            if (timeMoving >= momentumTime)
-            {
-                speed = Mathf.Clamp(speed + momentumSpeedIncrement, 0f, maxMomentum);
-            }
+            return;
         }
+
+
+        horizontal = Input.GetAxisRaw("Horizontal");
+
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            rb.velocity = new Vector3(rb.velocity.x, jumpingPower, rb.velocity.z);
+        }
+
+
+        if (Input.GetKey(KeyCode.LeftShift) && canDash && dashTimer <= 0)
+        {
+            StartCoroutine(Dash());
+            dashTimer = dashingCooldown;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.LeftControl) && ascendTimer <= 0)
+        {
+            StartCoroutine(Ascend());
+            ascendTimer = ascendingCooldown;
+        }
+
+
+        Flip();
+        UpdateCooldowns();
     }
-    else
-    {
-        isMoving = false;
-        speed = baseSpeed;
-    }
-
-    // Apply horizontal movement
-    Vector3 movement = new Vector3(horizontal * speed * Time.fixedDeltaTime, 0f, 0f);
-    rb.MovePosition(transform.position + movement);
-
-    // Apply gravity
-    rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
-
-    Flip();
-    UpdateCooldowns();
-
-    // Update UI elements
-    dashCooldownText.text = "Dash Cooldown: " + dashTimer.ToString("F1");
-    momentumText.text = "Momentum: " + speed.ToString("F1");
-}
-
-
 private void UpdateCooldowns()
 {
-    dashCooldownText.SetText("Dash Cooldown: " + Mathf.Clamp(dashTimer, 0f, Mathf.Infinity).ToString("0.00"));
-    ascendCooldownText.SetText("Ascend Cooldown: " + Mathf.Clamp(ascendTimer, 0f, Mathf.Infinity).ToString("0.00"));
+    dashCooldownText.SetText("Dash Cooldown: " + Mathf.Max(0f, dashTimer).ToString("0.00"));
+    ascendCooldownText.SetText("Ascend Cooldown: " + Mathf.Max(0f, ascendTimer).ToString("0.00"));
 }
 
 
@@ -150,11 +117,13 @@ private void UpdateCooldowns()
         rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
     }
 
-    
+
+   
     if (isDashing)
     {
         return;
     }
+
 
     if (isAscending)
     {
@@ -165,76 +134,32 @@ private void UpdateCooldowns()
         rb.AddForce(force, ForceMode.Force);
     }
 
+
     // Apply horizontal movement
     Vector3 movement = new Vector3(horizontal * speed * Time.fixedDeltaTime, 0f, 0f);
     rb.MovePosition(transform.position + movement);
 
-    // Apply gravity
-    rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
 
-    dashTimer = Mathf.Max(0.0f,dashTimer-Time.fixedDeltaTime);
-    // dashTimer -= Time.fixedDeltaTime;
+    // Apply gravity
+rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
+
+
+
+
+    dashTimer -= Time.fixedDeltaTime;
     ascendTimer -= Time.fixedDeltaTime;
 }
 
 
-    // private void OnCollisionEnter(Collision collision)
-    // {
-    //     if (collision.gameObject.CompareTag("Ground"))
-    //     {
-    //         canDash = true;
-    //     }
 
-    // }
-   private void OnTriggerEnter(Collider other)
+
+    private void OnCollisionEnter(Collision collision)
     {
-        if (isDashing)
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            if (other.CompareTag("NPC"))
-            {
-                StopCoroutine("Dash");
-                dashTimer = 0;
-                particleTrail.Stop();
-                dashTimer = 0f;
-
-                // Add momentum boost to the player
-                Vector3 boostDir = (other.transform.position - transform.position).normalized;
-                playerRigidbody.velocity = boostDir * momentumBoostForce;
-                Invoke("ResetVelocity", 0.1f);
-            }
-           
+            canDash = true;
         }
-          if (other.CompareTag("Item"))
-            {
-                  Debug.Log("item touch");
-                // Get a reference to the item's rigidbody
-                Rigidbody itemRigidbody = other.GetComponent<Rigidbody>();
-
-                // Disable the item's collider and rigidbody so it can be picked up
-                other.GetComponent<Collider>().enabled = false;
-                itemRigidbody.isKinematic = true;
-
-                // Move the item towards the player's position
-                Vector3 moveDirection = (transform.position - other.transform.position).normalized;
-                itemRigidbody.velocity = moveDirection * itemSpeed;
-
-                // Parent the item to the player's transform
-                other.transform.parent = transform;
-
-                // Destroy the item after a short delay
-                Destroy(other.gameObject, .1f);
-                Debug.Log("item pickup");
-//test
-              
-            }
     }
-
-    private void ResetVelocity()
-    {
-        playerRigidbody.velocity = Vector3.zero;
-    }
-
-
 
 
     private void Flip()
@@ -248,78 +173,46 @@ private void UpdateCooldowns()
         }
     }
 
+
     private IEnumerator Dash()
     {
         canDash = false;
         isDashing = true;
-        rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f); //consider adding force instead
+        rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f);
+        particleTrail.Play();
+
 
         yield return new WaitForSeconds(dashingTime);
 
+
+        particleTrail.Stop();
         isDashing = false;
 
-        yield return new WaitForSeconds(dashingCooldown);
+
+        // yield return new WaitForSeconds(dashingCooldown);
+
 
         canDash = true;
+        particleTrail.Play();
+
+
         dashTimer = 0f;
     }
+
 
     private IEnumerator Ascend()
     {
         isAscending = true;
 
+
         yield return new WaitForSeconds(0.1f);
+
 
         isAscending = false;
         ascendTimer = 0f;
     }
-
-    private IEnumerator Blink()
-{
-
-
-Debug.Log("blink");
-    // Don't blink if already dashing or ascending
-    if (isDashing || isAscending)
-    {
-        yield break;
-    }
-
-    // isDashing = true;
-
-    // Calculate blink direction
-    Vector3 blinkDirection = Vector3.right * (Input.GetKey(KeyCode.D) ? 1f : -1f);
-
-    // Move player forward by blink distance
-    Vector3 startPosition = transform.position;
-    Vector3 endPosition = transform.position + blinkDirection * blinkDistance;
-    float elapsedTime = 0f;
-    
-    while (elapsedTime < dashingTime)
-    {
-        rb.MovePosition(Vector3.Lerp(startPosition, endPosition, elapsedTime / dashingTime));
-        elapsedTime += Time.deltaTime;
-        yield return null;
-    }
-
-    // Stop player momentum after blink
-    rb.velocity = Vector3.zero;
-    isDashing = false;
-
-    // Add delay after blink
-    yield return new WaitForSeconds(1.0f);
-
-    // Start dash cooldown
-    canDash = false;
-    yield return new WaitForSeconds(dashingCooldown);
-    canDash = true;
-}
-
-
-
     private void ToggleHover()
 {
     isHovering = !isHovering;
 }
 }
-
