@@ -266,7 +266,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &348414570
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -559,6 +559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa52dcb583e1dd743bffce21bdda7fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 8
   jumpingPower: 35
   dashingPower: 30
   dashingTime: 1
@@ -5970,8 +5971,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1146156902}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.3846, y: -9.5164, z: 11.3201}
-  m_LocalScale: {x: 49.44057, y: 15.921042, z: 4.9743357}
+  m_LocalPosition: {x: 5.4425, y: -9.5004, z: 11.3201}
+  m_LocalScale: {x: 72.56869, y: 15.953828, z: 4.9743357}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -6043,17 +6044,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ae23dc27f8652ba41ad8547b8c3f9855,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae23dc27f8652ba41ad8547b8c3f9855,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.1
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae23dc27f8652ba41ad8547b8c3f9855,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae23dc27f8652ba41ad8547b8c3f9855,
         type: 3}
@@ -6104,6 +6105,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ae23dc27f8652ba41ad8547b8c3f9855,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ae23dc27f8652ba41ad8547b8c3f9855,
         type: 3}
@@ -6231,7 +6237,7 @@ Camera:
   far clip plane: 50
   field of view: 62.2
   orthographic: 1
-  orthographic size: 9.62
+  orthographic size: 14.29309
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -6255,7 +6261,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1387401113}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.76, z: -10.950001}
+  m_LocalPosition: {x: -1.23, y: 9.78, z: -11.58}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6600,9 +6606,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa52dcb583e1dd743bffce21bdda7fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpingPower: 45
-  dashingPower: 250
-  dashingTime: 0.1
+  speed: 15
+  jumpingPower: 50
+  dashingPower: 500
+  dashingTime: 0.01
   dashingCooldown: 2
   ascendingPower: 340
   ascendingCooldown: 10
@@ -6612,9 +6619,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   particleTrail: {fileID: 1478945483}
-  dashCooldownText: {fileID: 0}
-  ascendCooldownText: {fileID: 0}
-  fallSpeed: 3
+  dashCooldownText: {fileID: 2088889552}
+  ascendCooldownText: {fileID: 1471165520}
+  fallSpeed: 4
 --- !u!136 &1478945481
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -11577,7 +11584,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1917665215}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.753189, y: -0.36, z: 13.11}
+  m_LocalPosition: {x: -11.75, y: -0.36, z: 13.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -9,7 +9,7 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     private float horizontal;
-    private float speed = 8f;
+    [SerializeField] private float speed = 8f;
     [SerializeField] private float jumpingPower = 16f;
     private bool isFacingRight = true;
 
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private bool canDash = true;
     private bool isDashing;
     [SerializeField] private float dashingPower = 24f;
-    [SerializeField] private float dashingTime = 0.01f;
+    [SerializeField] private float dashingTime = 0.0f;
     [SerializeField] private float dashingCooldown = 2f;
     private float dashTimer = 0f;
 
@@ -175,29 +175,32 @@ rb.AddForce(Physics.gravity * fallSpeed * rb.mass, ForceMode.Force);
 
 
     private IEnumerator Dash()
+{
+    if (!canDash) yield break;
+    
+    canDash = false;
+
+    isDashing = true;
+    float timer = 0f;
+    rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f);
+    particleTrail.Play();
+
+    while (timer < dashingTime)
     {
-        canDash = false;
-        isDashing = true;
-        rb.velocity = new Vector3(transform.localScale.x * dashingPower, 0f, 0f);
-        particleTrail.Play();
-
-
-        yield return new WaitForSeconds(dashingTime);
-
-
-        particleTrail.Stop();
-        isDashing = false;
-
-
-        // yield return new WaitForSeconds(dashingCooldown);
-
-
-        canDash = true;
-        particleTrail.Play();
-
-
-        dashTimer = 0f;
+        timer += Time.deltaTime;
+        yield return null;
     }
+
+    particleTrail.Stop();
+    isDashing = false;
+    rb.velocity = Vector3.zero;
+
+    yield return new WaitForSeconds(dashingCooldown);
+
+    canDash = true;
+    particleTrail.Play();
+}
+
 
 
     private IEnumerator Ascend()
